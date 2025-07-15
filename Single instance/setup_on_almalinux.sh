@@ -8,6 +8,16 @@ magentaprint() { echo; printf "${MAGENTA}%s${RESET}\n" "$1"; }
 errorprint() { echo; printf "${RED}%s${RESET}\n" "$1"; }
 greenprint() { echo; printf "${GREEN}%s${RESET}\n" "$1"; }
 
+
+# ---------------------------------------------------------------------------------------
+
+
+# Проверка запуска c sudo
+if [ "$EUID" -ne 0 ]; then
+    errorprint "Скрипт должен быть запущен через sudo!"
+    exit 1
+fi
+
 # Добавление репозитория MongoDB
 magentaprint "Добавление репозитория MongoDB"
 cat <<EOF > /etc/yum.repos.d/mongodb-org-6.0.repo
