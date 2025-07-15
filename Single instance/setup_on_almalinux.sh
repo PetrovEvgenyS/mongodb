@@ -8,6 +8,8 @@ magentaprint() { echo; printf "${MAGENTA}%s${RESET}\n" "$1"; }
 errorprint() { echo; printf "${RED}%s${RESET}\n" "$1"; }
 greenprint() { echo; printf "${GREEN}%s${RESET}\n" "$1"; }
 
+# Переменные
+SERVER_IP="$1"  # IP-адрес сервера, на котором будет установлена MongoDB
 
 # ---------------------------------------------------------------------------------------
 
@@ -15,6 +17,13 @@ greenprint() { echo; printf "${GREEN}%s${RESET}\n" "$1"; }
 # Проверка запуска c sudo
 if [ "$EUID" -ne 0 ]; then
     errorprint "Скрипт должен быть запущен через sudo!"
+    exit 1
+fi
+
+# Проверка наличия аргументов
+if [ -z "$SERVER_IP" ]; then
+    errorprint "Не указан IP-адрес сервера. Используйте: $0 <IP-адрес>"
+    echo "Пример: $0 10.100.10.1"
     exit 1
 fi
 
@@ -38,8 +47,8 @@ magentaprint "Установка MongoDB ..."
 dnf install -y mongodb-org
 
 # Настройка, по какому IP будет доступна MongoDB
-magentaprint "Настройка IP для доступа к MongoDB"
-sed -i 's/bindIp: 127.0.0.1/bindIp: 127.0.0.1,10.100.10.1/' /etc/mongod.conf
+magentaprint "Настройка IP для доступа к MongoDB: $SERVER_IP"
+sed -i "s/bindIp: 127.0.0.1/bindIp: 127.0.0.1,$SERVER_IP/" /etc/mongod.conf
 grep -i "bindIp" /etc/mongod.conf
 
 # Настройка firewall:
