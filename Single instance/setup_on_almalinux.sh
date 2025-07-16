@@ -11,6 +11,7 @@ greenprint() { echo; printf "${GREEN}%s${RESET}\n" "$1"; }
 # Переменные
 SERVER_IP="$1"  # IP-адрес сервера, на котором будет установлена MongoDB
 
+
 # ---------------------------------------------------------------------------------------
 
 
@@ -46,10 +47,56 @@ dnf update -y
 magentaprint "Установка MongoDB ..."
 dnf install -y mongodb-org
 
-# Настройка, по какому IP будет доступна MongoDB
-magentaprint "Настройка IP для доступа к MongoDB: $SERVER_IP"
-sed -i "s/bindIp: 127.0.0.1/bindIp: 127.0.0.1,$SERVER_IP/" /etc/mongod.conf
-grep -i "bindIp" /etc/mongod.conf
+# Настройка конфигурации MongoDB
+magentaprint "Настройка конфигурации MongoDB /etc/mongod.conf..."
+cat <<EOF > /etc/mongod.conf
+# mongod.conf
+# for documentation of all options, see:
+#   http://docs.mongodb.org/manual/reference/configuration-options/
+
+# Логирование
+systemLog:
+  destination: file
+  path: /var/log/mongodb/mongod.log
+  logAppend: true                   # Добавление новых логов в конец файла
+  verbosity: 0                      # Уровень логирования (0-5, 0 минимальный)
+
+# Настройки хранения данных
+storage:
+  dbPath: /var/lib/mongo
+  journal:                          # Включение журнала для повышения надежности
+    enabled: true
+#  engine:
+  wiredTiger:                       # Использование WiredTiger как движка хранения
+    engineConfig:                   # Настройки движка WiredTiger
+      cacheSizeGB: 1                # Настройте под объем оперативной памяти (обычно 50% от RAM)
+
+# how the process runs
+processManagement:
+  pidFilePath: /var/run/mongodb/mongod.pid  # Путь к PID-файлу
+  timeZoneInfo: /usr/share/zoneinfo         # Путь к информации о временных зонах
+
+# Сетевые настройки
+net:
+  port: 27017
+  bindIp: 127.0.0.1,$SERVER_IP      # IP-адреса, на которых будет слушать MongoDB
+  maxIncomingConnections: 65536     # Максимальное количество входящих соединений
+
+#security:
+
+#operationProfiling:
+
+#replication:
+
+#sharding:
+
+## Enterprise-Only Options
+
+#auditLog:
+
+#snmp:
+
+EOF
 
 # Настройка firewall:
 magentaprint "Настраиваем firewall для MongoDB:"
