@@ -106,6 +106,7 @@ firewall-cmd --list-all
 
 # Проверка статуса и вервии MongoDB:
 magentaprint "Проверка статуса MongoDB:"
+systemctl restart mongod                # Перезапуск службы для применения изменений
 systemctl enable --now mongod
 systemctl status mongod --no-pager
 
