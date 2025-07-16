@@ -48,7 +48,7 @@ magentaprint "Установка MongoDB ..."
 dnf install -y mongodb-org
 
 # Настройка конфигурации MongoDB
-magentaprint "Настройка конфигурации MongoDB /etc/mongod.conf..."
+magentaprint "Настройка конфигурации MongoDB /etc/mongod.conf ..."
 cat <<EOF > /etc/mongod.conf
 # mongod.conf
 # for documentation of all options, see:
@@ -80,11 +80,14 @@ processManagement:
 net:
   port: 27017
   bindIp: 127.0.0.1,$SERVER_IP      # IP-адреса, на которых будет слушать MongoDB
-  maxIncomingConnections: 65536     # Максимальное количество входящих соединений
+  maxIncomingConnections: 51200     # Максимальное количество входящих соединений
 
 #security:
 
-#operationProfiling:
+# Режим профилирования операций:
+operationProfiling:
+  mode: slowOp                      # Режим профилирования: slowOp (для медленных операций)
+  slowOpThresholdMs: 100            # Порог медленной операции в миллисекундах
 
 #replication:
 
